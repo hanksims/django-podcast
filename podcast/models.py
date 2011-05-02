@@ -485,7 +485,7 @@ class Episode(models.Model):
     def save(self, *args, **kwargs):
         if not self.publish:
             self.publish = datetime.datetime.now()
-        super(self, Episode).save(*args, **kwargs)
+        super(Episode, self).save(*args, **kwargs)
 
     @models.permalink
     def get_absolute_url(self):
