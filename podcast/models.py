@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from podcast.managers import EpisodeManager
+import datetime
 
 
 class ParentCategory(models.Model):
@@ -440,6 +441,7 @@ class Episode(models.Model):
     frequency = models.CharField(max_length=10, choices=FREQUENCY_CHOICES, blank=True, help_text='The frequency with which the episode\'s data changes. For sitemaps.', default='never')
     priority = models.DecimalField(max_digits=2, decimal_places=1, blank=True, null=True, help_text='The relative priority of this episode compared to others. 1.0 is the most important. For sitemaps.', default='0.5')
     status = models.IntegerField(choices=STATUS_CHOICES, default=2)
+    publish = models.DateTimeField(blank=True, null=True)
     date = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)
     # iTunes
@@ -479,6 +481,11 @@ class Episode(models.Model):
 
     def __unicode__(self):
         return u'%s' % (self.title)
+
+    def save(self, *args, **kwargs):
+        if not self.publish:
+            self.publish = datetime.datetime.now()
+        super(self, Episode).save(*args, **kwargs)
 
     @models.permalink
     def get_absolute_url(self):
