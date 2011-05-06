@@ -58,14 +58,14 @@ class EpisodeAdmin(admin.ModelAdmin):
     list_filter = ('show', 'update')
     radio_fields = {'title_type': admin.HORIZONTAL, 'description_type': admin.HORIZONTAL, 'status': admin.HORIZONTAL}
     fieldsets = (
-        (None, {
-            'fields': ('show', 'author', 'title_type', 'title', 'slug', 'description_type', 'description', 'status', 'publish')
+        ('Advanced options', {
+            'fields': ('slug', 'title_type', 'description_type',),
+            'classes': ('collapse',),
         }),
-        ('iTunes', {
-            'fields': ('subtitle', ('minutes', 'seconds'), 'keywords',)
+        (None, {
+            'fields': ('show', 'author', 'title', 'subtitle', 'description', 'keywords', 'status', 'publish')
         }),
     )
-
 
 admin.site.register(ParentCategory, ParentCategoryAdmin)
 admin.site.register(ChildCategory, ChildCategoryAdmin)
