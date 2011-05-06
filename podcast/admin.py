@@ -40,7 +40,7 @@ class EnclosureInline(admin.StackedInline):
     extra = 1
     fieldsets = (
         (None, {
-            'fields': ('title', 'file', 'mime', 'medium', 'expression', 'frame', 'bitrate', 'sample', 'channel', 'algo', 'hash', 'player', 'embed', ('width', 'height')),
+            'fields': ('file', 'mime', 'medium',),
             'description': ('Only the last <em>saved</em> enclosure is displayed in plain RSS and iTunes feeds')
         }),
     )
@@ -59,22 +59,10 @@ class EpisodeAdmin(admin.ModelAdmin):
     radio_fields = {'title_type': admin.HORIZONTAL, 'description_type': admin.HORIZONTAL, 'status': admin.HORIZONTAL}
     fieldsets = (
         (None, {
-            'fields': ('show', 'author', 'title_type', 'title', 'slug', 'description_type', 'description', 'captions', 'category', 'domain', 'frequency', 'priority', 'status', 'publish')
+            'fields': ('show', 'author', 'title_type', 'title', 'slug', 'description_type', 'description', 'status', 'publish')
         }),
         ('iTunes', {
-            'fields': ('subtitle', 'summary', ('minutes', 'seconds'), 'keywords', ('explicit', 'block'))
-        }),
-        ('Media RSS', {
-            'classes': ('collapse',),
-            'fields': ('role', 'media_category', ('standard', 'rating'), 'image', 'text', ('deny', 'restriction'))
-        }),
-        ('Dublin Core', {
-            'classes': ('collapse',),
-            'fields': (('start', 'end'), 'scheme', 'name')
-        }),
-        ('Google Media', {
-            'classes': ('collapse',),
-            'fields': ('preview', ('preview_start_mins', 'preview_start_secs'), ('preview_end_mins', 'preview_end_secs'), 'host')
+            'fields': ('subtitle', ('minutes', 'seconds'), 'keywords',)
         }),
     )
 
