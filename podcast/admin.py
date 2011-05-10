@@ -67,6 +67,19 @@ class EpisodeAdmin(admin.ModelAdmin):
         }),
     )
 
+    # If no authors are chosen in the Episode admin, default to 
+    # Show authors.
+
+    def save_model(self, request, obj, form, change):
+        data = form.cleaned_data
+        if (not change) and (not data['author']):
+            show = data['show']
+            print(show)
+            print(data['author'])
+            authors=list(show.author.all())
+            form.cleaned_data['author'] = authors
+        obj.save()
+
 admin.site.register(ParentCategory, ParentCategoryAdmin)
 admin.site.register(ChildCategory, ChildCategoryAdmin)
 admin.site.register(MediaCategory, MediaCategoryAdmin)
