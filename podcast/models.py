@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from podcast.managers import EpisodeManager
 import datetime
 
-
 class ParentCategory(models.Model):
     """Parent Category model."""
     PARENT_CHOICES = (
@@ -429,7 +428,7 @@ class Episode(models.Model):
     )
     # RSS 2.0
     show = models.ForeignKey(Show)
-    author = models.ManyToManyField(User, related_name='episode_authors', help_text='Remember to save the user\'s name and e-mail address in the <a href="../../../auth/user/">User application</a>.')
+    author = models.ManyToManyField(User, blank=True, related_name='episode_authors', help_text='Remember to save the user\'s name and e-mail address in the <a href="../../../auth/user/">User application</a>.')
     title_type = models.CharField('Title type', max_length=255, blank=True, default='Plain', choices=TYPE_CHOICES)
     title = models.CharField(max_length=255, help_text='Make it specific but avoid explicit language. Limit to 100 characters for a Google video sitemap.')
     slug = models.SlugField(unique=True, help_text='Auto-generated from Title.')
