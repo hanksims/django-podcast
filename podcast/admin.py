@@ -59,11 +59,11 @@ class EpisodeAdmin(admin.ModelAdmin):
     radio_fields = {'title_type': admin.HORIZONTAL, 'description_type': admin.HORIZONTAL, 'status': admin.HORIZONTAL}
     fieldsets = (
         ('Advanced options', {
-            'fields': ('slug', 'title_type', 'description_type',),
+            'fields': ('author', 'status', 'slug', 'title_type', 'description_type',),
             'classes': ('collapse',),
         }),
         (None, {
-            'fields': ('show', 'author', 'title', 'subtitle', 'description', 'keywords', 'status', 'publish')
+            'fields': ('show', 'title', 'subtitle', 'description', 'keywords', 'publish')
         }),
     )
 
@@ -74,9 +74,7 @@ class EpisodeAdmin(admin.ModelAdmin):
         data = form.cleaned_data
         if (not change) and (not data['author']):
             show = data['show']
-            print(show)
-            print(data['author'])
-            authors=list(show.author.all())
+            authors = list(show.author.all())
             form.cleaned_data['author'] = authors
         obj.save()
 
