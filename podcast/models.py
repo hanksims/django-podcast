@@ -3,6 +3,15 @@ from django.contrib.auth.models import User
 from podcast.managers import EpisodeManager
 import datetime
 
+import urllib
+import os.path
+
+def show_home(instance, name):
+    return 'uploads/podcast/%s/%s' % (instance.episode.show.slug, urllib.quote_plus(name))
+
+def enclosure_home(instance, name):
+    return 'uploads/podcast/%s/%s/%s' % (instance.episode.show.slug, instance.episode.pk, urllib.quote_plus(name))
+
 class ParentCategory(models.Model):
     """Parent Category model."""
     PARENT_CHOICES = (
@@ -170,7 +179,7 @@ class Show(models.Model):
     category_show = models.CharField('Category', max_length=255, blank=True, help_text='Limited to one user-specified category for the sake of sanity.')
     domain = models.URLField(blank=True, help_text='A URL that identifies a categorization taxonomy.')
     ttl = models.PositiveIntegerField('TTL', help_text='"Time to Live," the number of minutes a channel can be cached before refreshing.', blank=True, null=True)
-    image = models.ImageField(upload_to='podcasts/shows/img/', help_text='An attractive, original square JPEG (.jpg) or PNG (.png) image of 600x600 pixels. Image will be scaled down to 50x50 pixels at smallest in iTunes.', blank=True)
+    image = models.ImageField(upload_to=show_home, help_text='An attractive, original square JPEG (.jpg) or PNG (.png) image of 600x600 pixels. Image will be scaled down to 50x50 pixels at smallest in iTunes.', blank=True)
     feedburner = models.URLField('FeedBurner URL', help_text='Fill this out after saving this show and at least one episode. URL should look like "http://feeds.feedburner.com/TitleOfShow". See <a href="http://code.google.com/p/django-podcast/">documentation</a> for more.', blank=True)
     # iTunes
     subtitle = models.CharField(max_length=255, help_text='Looks best if only a few words, like a tagline.', blank=True)
@@ -434,7 +443,7 @@ class Episode(models.Model):
     slug = models.SlugField(unique=True, help_text='Auto-generated from Title.')
     description_type = models.CharField('Description type', max_length=255, blank=True, default='Plain', choices=TYPE_CHOICES)
     description = models.TextField(help_text='Avoid explicit language. Google video sitempas allow 2,048 characters.')
-    captions = models.FileField(upload_to='podcasts/episodes/captions/', help_text='For video podcasts. Good captioning choices include <a href="http://en.wikipedia.org/wiki/SubViewer">SubViewer</a>, <a href="http://en.wikipedia.org/wiki/SubRip">SubRip</a> or <a href="http://www.w3.org/TR/ttaf1-dfxp/">TimedText</a>.', blank=True)
+    captions = models.FileField(upload_to=enclosure_home, help_text='For video podcasts. Good captioning choices include <a href="http://en.wikipedia.org/wiki/SubViewer">SubViewer</a>, <a href="http://en.wikipedia.org/wiki/SubRip">SubRip</a> or <a href="http://www.w3.org/TR/ttaf1-dfxp/">TimedText</a>.', blank=True)
     category = models.CharField(max_length=255, blank=True, help_text='Limited to one user-specified category for the sake of sanity.')
     domain = models.URLField(blank=True, help_text='A URL that identifies a categorization taxonomy.')
     frequency = models.CharField(max_length=10, choices=FREQUENCY_CHOICES, blank=True, help_text='The frequency with which the episode\'s data changes. For sitemaps.', default='never')
@@ -456,7 +465,7 @@ class Episode(models.Model):
     media_category = models.ManyToManyField(MediaCategory, related_name='episode_categories', blank=True)
     standard = models.CharField(max_length=255, blank=True, choices=STANDARD_CHOICES, default='Simple')
     rating = models.CharField(max_length=255, blank=True, choices=RATING_CHOICES, help_text='If used, selection must match respective Scheme selection.', default='Nonadult')
-    image = models.ImageField(upload_to='podcasts/episodes/img/', help_text='A still image from a video file, but for episode artwork to display in iTunes, image must be <a href="http://answers.yahoo.com/question/index?qid=20080501164348AAjvBvQ">saved to file\'s <strong>metadata</strong></a> before episode uploading!', blank=True)
+    image = models.ImageField(upload_to=enclosure_home, help_text='A still image from a video file, but for episode artwork to display in iTunes, image must be <a href="http://answers.yahoo.com/question/index?qid=20080501164348AAjvBvQ">saved to file\'s <strong>metadata</strong></a> before episode uploading!', blank=True)
     text = models.TextField(blank=True, help_text='Media RSS text transcript. Must use <media:text> tags. Please see the <a href="https://www.google.com/webmasters/tools/video/en/video.html#tagMediaText">Media RSS 2.0</a> specification for syntax.')
     deny = models.BooleanField(default=False, help_text='Check to deny episode to be shown to users from specified countries.')
     restriction = models.CharField(max_length=255, blank=True, help_text='A space-delimited list of <a href="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements">ISO 3166-1-coded countries</a>.')
@@ -525,7 +534,7 @@ class Enclosure(models.Model):
         ('SHA-1', 'SHA-1'),
     )
     title = models.CharField(max_length=255, blank=True, help_text='Title is generally only useful with multiple enclosures.')
-    file = models.FileField(upload_to='podcasts/episodes/files/', help_text='Either upload or use the "Player" text box below. If uploading, file must be less than or equal to 30 MB for a Google video sitemap.', blank=True, null=True)
+    file = models.FileField(upload_to=enclosure_home, help_text='Either upload or use the "Player" text box below. If uploading, file must be less than or equal to 30 MB for a Google video sitemap.', blank=True, null=True)
     mime = models.CharField('Format', max_length=255, choices=MIME_CHOICES, default='audio/mpeg', blank=True)
     medium = models.CharField(max_length=255, blank=True, choices=MEDIUM_CHOICES, default='Audio')
     expression = models.CharField(max_length=25, blank=True, choices=EXPRESSION_CHOICES, default='Full')
