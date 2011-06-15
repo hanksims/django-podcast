@@ -7,7 +7,7 @@ import urllib
 import os.path
 
 def show_home(instance, name):
-    return 'uploads/podcast/%s/%s' % (instance.episode.show.slug, urllib.quote_plus(name))
+    return 'uploads/podcast/%s/%s' % (instance.slug, urllib.quote_plus(name))
 
 def enclosure_home(instance, name):
     return 'uploads/podcast/%s/%s/%s' % (instance.episode.show.slug, instance.episode.pk, urllib.quote_plus(name))

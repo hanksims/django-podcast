@@ -22,25 +22,25 @@ class FillInEpisode(Task):
         episode.seconds = unicode( int(length % 60) )
         episode.save()        
 
-class Tagger(Task):
-    def add_tags(self, enclosure):
-        audio = MP3(enclosure.file.path, ID3=EasyID3)
-        episode = enclosure.episode
+class MutagenTagger(Task):
 
+    def add_tags(self, audio_path=None, title=None, album=None, artist=None):
+        audio = MP3(audio_path, ID3=EasyID3)
+
+        # Mutagen requires this 
         try:
             audio.add_tags(ID3=EasyID3)
         except MutagenError:
             pass
 
-        audio['title'] = episode.title
-        audio['album'] = episode.show.title
-        audio['artist'] = ', '.join([author.get_full_name() for author in episode.author.all()])
+        audio['title'] = title
+        audio['album'] = album
+        audio['artist'] = artist
         audio.save()
 
-    def add_image(self, enclosure):
-        audio = MP3(enclosure.file.path, ID3=ID3)
-        episode = enclosure.episode
-        picture = file(episode.show.image.path)
+    def add_image(self, audio_path=None, image_path=None):
+        audio = MP3(audio_path)
+        image = file(image_path)
 
         try: 
             audio.add_tags()
@@ -52,21 +52,56 @@ class Tagger(Task):
                 encoding=3,
                 type=3,
                 desc='Cover',
-                data=picture.read(),
-                mime=mimetypes.guess_type( episode.show.image.path )
+                data=image.read(),
+                mime=mimetypes.guess_type( image_path )
             )
         )
         audio.save()
-        picture.close()
+        image.close()
+
+    def run(self, 
+        audio_path = None,
+        image_path = None,
+        title = None,
+        album = None,
+        artist = None
+    ):
+        if audio_path:
+            self.add_tags(
+                audio_path = audio_path,
+                title = title,
+                album = album,
+                artist = artist
+            )
+            if image_path:
+                self.add_image(
+                    audio_path = audio_path,
+                    image_path = image_path
+                )
+
+class EnclosureMutagenTagger(MutagenTagger):
 
     def run(self, pk):
         enclosure = Enclosure.objects.get(pk=pk)
+        episode = enclosure.episode
         if not enclosure.medium == 'Audio':
             return False
-        self.add_tags(enclosure)
-        self.add_image(enclosure)
+
+        title = episode.title
+        album = episode.show.title
+        artist = ', '.join([author.get_full_name() for author in episode.author.all()])
+        image_path = enclosure.episode.show.image.path
+        audio_path = enclosure.file.path
+
+        super(EnclosureMutagenTagger, self).run(
+            audio_path = audio_path,
+            image_path = image_path,
+            title = title,
+            album = album,
+            artist = artist
+        )
         
 def post_enclosure_save(sender, instance, created, *args, **kwargs):
     FillInEpisode().delay(instance.pk)
-    Tagger().delay(instance.pk)
+    EnclosureMutagenTagger().delay(instance.pk)
 post_save.connect(post_enclosure_save, Enclosure)
